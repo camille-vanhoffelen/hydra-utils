@@ -1,18 +1,32 @@
+await loadScript('https://cdn.jsdelivr.net/gh/camille-vanhoffelen/hydra-utils@latest/sources.js')
+
 const GlslSourcePrototype = Object.getPrototypeOf(osc());
 
-function transformColorArrays(arrays) {
+/**
+ * Takes an array of RGB color arrays and reshapes them into separate channel arrays.
+ * For example: [[r1,g1,b1], [r2,g2,b2]] becomes [[r1,r2], [g1,g2], [b1,b2]]
+ * 
+ * Preserves any special properties (keys starting with '_') from the input array
+ * by copying them to each output channel array.
+ * 
+ * @param {Array<Array<number>>} arrays - Array of RGB color arrays, each containing 3 numbers
+ * @returns {Array<Array<number>>} Array of 3 arrays containing the R, G, and B channels
+ * @throws {Error} If input is not a non-empty array of 3-element arrays
+ */
+
+function reshapeColorArrays(arrays) {
   if (!Array.isArray(arrays) || arrays.length === 0) {
     throw new Error("Input must be a non-empty array of arrays");
   }
-  
+
   for (const arr of arrays) {
     if (!Array.isArray(arr) || arr.length !== 3) {
       throw new Error("Each inner array must contain exactly 3 elements");
     }
   }
-  
+
   const result = [[], [], []];
-  
+
   for (const arr of arrays) {
     result[0].push(arr[0]);
     result[1].push(arr[1]);
@@ -26,11 +40,11 @@ function transformColorArrays(arrays) {
       }
     });
   }
-  
+
   return result;
 }
 
-function better_gradient(speed = 0.5) {
+function betterGradient(speed = 0.5) {
   return osc(Math.PI / 2, speed, Math.PI / 2)
     .blend(
       osc(Math.PI / 2, speed, Math.PI / 2)
@@ -38,57 +52,42 @@ function better_gradient(speed = 0.5) {
     )
 }
 
-function monoStripes(sourceX, colorX) {
-  return osc(20, 0.04)
-    .color(...colorX)
-    .posterize(20)
-    .modulate(sourceX, 0.5)
-}
 
-function duoStripes(sourceX, sourceXClone, lightColor, darkColor) {
-  var oscFreq = 5;
-  var oscSync = 0.4;
-  return osc(oscFreq, oscSync)
-    .color(...lightColor)
-    .modulate(sourceX, 0.5)
-    .add(
-      osc(oscFreq, oscSync)
-        .invert()
-        .color(...darkColor)
-        .modulate(sourceXClone, 0.5)
-    )
-}
-
-function monochrome(sourceX, colorX) {
-  return sourceX
+/**
+ * Creates a simple bichrome effect by saturating the source and adding a color.
+ * 
+ * usage:
+ * source.bichrome(...lightColor)
+ * 
+ */
+GlslSourcePrototype.simpleBichrome = function (r, g, b) {
+  return this
     .saturate(0)
-    .color(...colorX)
-}
+    .color(r, g, b)
+    .contrast(0.1)
+    .saturate(10);
+};
 
-function duochrome(sourceX, sourceXClone, lightColor, darkColor) {
-  return sourceX
+/**
+ * Creates a bichrome effect by adding a color to the source and inverting it.
+ * 
+ * usage:
+ * source.bichrome(...lightColor, ...darkColor)
+ * 
+ */
+GlslSourcePrototype.bichrome = function (r1, g1, b1, r2, g2, b2) {
+  let sourceClone = cloneSource(this);
+  return this
     .saturate(0)
-    .color(...lightColor)
-    .add(sourceXClone
+    .color(r1, g1, b1)
+    .add(sourceClone
       .invert()
       .saturate(0)
-      .color(...darkColor)
-    )
-}
-
-GlslSourcePrototype.simpleDuochrome = function(r, g, b) {
-  return this
-        .saturate(0)
-        .color(r, g, b)
-        .contrast(0.1)
-        .saturate(10);
+      .color(r2, g2, b2)
+    );
 };
 
 module.exports = {
-  transformColorArrays,
-  better_gradient,
-  monoStripes,
-  duoStripes,
-  monochrome,
-  duochrome,
+  reshapeColorArrays,
+  betterGradient,
 } 

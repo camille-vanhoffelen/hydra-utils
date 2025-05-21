@@ -75,7 +75,81 @@ function srcFit(source, maxWidth = width, maxHeight = height) {
   return solid(0, 0, 0, 0);
 }
 
+/**
+ * Creates a deep clone of a HydraSource/GlslSource object.
+ * The cloned source is independent and can be modified without affecting the original.
+ * Useful to avoid "too much recursion errors" with self-modulation and feedback.
+ * 
+ * @param {GlslSource} source - The HydraSource object to clone (e.g., from osc(), shape(), etc.)
+ * @returns {GlslSource} A new independent copy of the source with all transforms preserved
+ * @throws {Error} If the source is not a valid GlslSource object
+ */
+function cloneSource(source) {
+    // Check if the source is a valid GlslSource
+    if (!source || source.type !== 'GlslSource' || !source.transforms) {
+      throw new Error('Invalid source: must be a HydraSource/GlslSource object');
+    }
+    
+    // Create a new GlslSource instance
+    const cloned = new source.constructor({
+      name: source.transforms[0].name,
+      transform: source.transforms[0].transform,
+      userArgs: source.transforms[0].userArgs,
+      defaultOutput: source.defaultOutput,
+      defaultUniforms: source.defaultUniforms,
+      synth: source.synth
+    });
+    
+    // Clear the transforms array (it will have the first transform from constructor)
+    cloned.transforms = [];
+    
+    // Deep copy all transforms
+    source.transforms.forEach((transform) => {
+      // Clone the transform object
+      const clonedTransform = {
+        name: transform.name,
+        transform: transform.transform, // transform definitions are shared, no need to deep copy
+        userArgs: cloneUserArgs(transform.userArgs),
+        synth: transform.synth
+      };
+      
+      cloned.transforms.push(clonedTransform);
+    });
+    
+    return cloned;
+  }
+  
+  /**
+   * Helper function to clone user arguments for transforms.
+   * Handles different argument types appropriately:
+   * - Functions are kept as references (meant to be shared)
+   * - Arrays are shallow copied
+   * - GlslSource objects are recursively cloned
+   * - Primitives are copied by value
+   * 
+   * @param {Array} args - Array of user arguments from a transform
+   * @returns {Array} Cloned array of arguments
+   * @private
+   */
+  function cloneUserArgs(args) {
+    if (!args) return args;
+    
+    return args.map(arg => {
+      // If it's a function, return it as-is (functions are meant to be shared)
+      if (typeof arg === 'function') {
+        return arg;
+      }
+      // If it's an array, create a shallow copy
+      if (Array.isArray(arg)) {
+        return [...arg];
+      }
+      // For primitives and other objects, return as-is
+      return arg;
+    });
+  }
+
 module.exports = {
   srcScale,
-  srcFit
+  srcFit,
+  cloneSource,
 } 

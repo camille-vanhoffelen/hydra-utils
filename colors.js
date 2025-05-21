@@ -76,11 +76,10 @@ function duochrome(sourceX, sourceXClone, lightColor, darkColor) {
     )
 }
 
-GlslSourcePrototype.simpleDuochrome = function(colorX) {
-  // 'this' refers to the current GlslSource object
+GlslSourcePrototype.simpleDuochrome = function(r, g, b) {
   return this
         .saturate(0)
-        .color(...colorX)
+        .color(r, g, b)
         .contrast(0.1)
         .saturate(10);
 };

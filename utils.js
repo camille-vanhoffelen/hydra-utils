@@ -342,25 +342,25 @@ function srcScale(source, scale = 1.0) {
 
 /**
  * Display a Hydra source fitting within specified bounds while maintaining aspect ratio
- * 
+ *
  * @param {Object} source - A Hydra source object (e.g., s0, s1, s2, s3)
- * @param {number} [maxWidth=window.innerWidth] - Maximum width in pixels (defaults to window width)
- * @param {number} [maxHeight=window.innerHeight] - Maximum height in pixels (defaults to window height)
+ * @param {number} [maxWidth=width] - Maximum width in pixels (defaults to screen width)
+ * @param {number} [maxHeight=height] - Maximum height in pixels (defaults to screen height)
  * @returns {Object} Hydra transform chain that can be further modified or output
- * 
+ *
  * @example
  * s0.initImage("photo.jpg")
  * srcFit(s0).out()  // Fit to full window (default)
- * 
+ *
  * @example
  * s0.initImage("photo.jpg")
  * srcFit(s0, 800, 600).out()  // Fit within 800x600 box
  */
-function srcFit(source, maxWidth = window.innerWidth, maxHeight = window.innerHeight) {
+function srcFit(source, maxWidth = width, maxHeight = height) {
   if (source && source.tex) {
     const aspect = source.tex.width / source.tex.height;
     const targetAspect = maxWidth / maxHeight;
-    
+
     let width, height;
     if (aspect > targetAspect) {
       // Image is wider than target - fit to width
@@ -371,8 +371,9 @@ function srcFit(source, maxWidth = window.innerWidth, maxHeight = window.innerHe
       height = maxHeight;
       width = maxHeight * aspect;
     }
-    
+
     return srcSize(source, width, height);
   }
   return solid(0, 0, 0, 0);
 }
+

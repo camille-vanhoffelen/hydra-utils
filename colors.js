@@ -1,4 +1,7 @@
-await loadScript('https://cdn.jsdelivr.net/gh/camille-vanhoffelen/hydra-utils@latest/sources.js')
+(async function() {
+  await loadScript('https://cdn.jsdelivr.net/gh/camille-vanhoffelen/hydra-utils@main/sources.js');
+})();
+
 
 const GlslSourcePrototype = Object.getPrototypeOf(osc());
 

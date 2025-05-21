@@ -1,3 +1,5 @@
+const GlslSourcePrototype = Object.getPrototypeOf(osc());
+
 function transformColorArrays(arrays) {
   if (!Array.isArray(arrays) || arrays.length === 0) {
     throw new Error("Input must be a non-empty array of arrays");
@@ -74,13 +76,14 @@ function duochrome(sourceX, sourceXClone, lightColor, darkColor) {
     )
 }
 
-function simpleDuochrome(sourceX, colorX) {
-  return sourceX
-    .saturate(0)
-    .color(...colorX)
-    .contrast(0.1)
-    .saturate(10)
-}
+GlslSourcePrototype.simpleDuochrome = function(colorX) {
+  // 'this' refers to the current GlslSource object
+  return this
+        .saturate(0)
+        .color(...colorX)
+        .contrast(0.1)
+        .saturate(10);
+};
 
 module.exports = {
   transformColorArrays,
@@ -89,5 +92,4 @@ module.exports = {
   duoStripes,
   monochrome,
   duochrome,
-  simpleDuochrome
 } 

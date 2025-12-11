@@ -15,13 +15,13 @@ function fadeOut(duration, min = 0.0) {
 }
 
 function pulse(period_in_ms = 1000, duration_in_ms = 100.0) {
-  return () => + (time * 1000 % period_in_ms > duration_in_ms)
+  return () => + (time * 1000 % period_in_ms < duration_in_ms)
 }
 
 function pulse_bpm(speed = 1, duration_in_ms = 100.0) {
   return () => {
     period_in_ms = 60 * 1000 / (bpm * speed)
-    return + (time * 1000 % period_in_ms > duration_in_ms)
+    return + (time * 1000 % period_in_ms < duration_in_ms)
   }
 }
 

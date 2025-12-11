@@ -116,6 +116,7 @@ function cloneSource(source) {
       cloned.transforms.push(clonedTransform);
     });
     
+    // TODO also clone the args of the source
     return cloned;
   }
   

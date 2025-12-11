@@ -90,7 +90,70 @@ GlslSourcePrototype.bichrome = function (r1, g1, b1, r2, g2, b2) {
     );
 };
 
+/**
+ * 
+ * Usage: 
+ * `let [reds, greens, blues] = splitColors(base)`
+ * @param {source} sourceX 
+ * @returns 
+ */
+function splitColors(sourceX) {
+  return [
+    cloneSource(sourceX).color(1, 0, 0),
+    cloneSource(sourceX).color(0, 1, 0),
+    cloneSource(sourceX).color(0, 0, 1)
+  ]
+}
+
+/**
+ * Usage:
+ * let transforms = [
+  [0, 0, 1],
+  [0, 0, 1],
+  [1, 0, 0],
+]
+
+let shifted = shiftColors(src(s0), transforms)
+ * 
+ * @param {source} sourceX 
+ * @param {Array<Array<number>>} transforms 
+ * @returns 
+ */
+function shiftColors(sourceX, transforms) {
+  return cloneSource(sourceX).r().color(...transforms[0])
+    .add(
+    cloneSource(sourceX).g().color(...transforms[1]),
+      )
+    .add(
+    cloneSource(sourceX).b().color(...transforms[2]),
+      )
+}
+
+/**
+ * Converts a hex color to an RGB array.
+ * 
+ * Usage:
+ * let color1 = hexToRgb('#ff0000')
+ * osc().color(...color1).out()
+ * 
+ * @param {string} hex - The hex color string to convert
+ * @returns {Array<number>} Array containing the normalized RGB values (0-1)
+ */
+function hexToRgb(hex) {
+  // Remove the hash if present
+  hex = hex.replace('#', '');
+  
+  // Parse the hex values and normalize to 0-1 range
+  const r = parseInt(hex.substring(0, 2), 16) / 255;
+  const g = parseInt(hex.substring(2, 4), 16) / 255;
+  const b = parseInt(hex.substring(4, 6), 16) / 255;
+  
+  return [ r, g, b ];
+}
+
 module.exports = {
   reshapeColorArrays,
   betterGradient,
+  splitColors,
+  shiftColors,
 } 

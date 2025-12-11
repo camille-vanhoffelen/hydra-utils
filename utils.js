@@ -240,6 +240,37 @@ GlslSourcePrototype.bichrome = function (r1, g1, b1, r2, g2, b2) {
         );
 };
 
+/**
+ * Creates a blur effect by blending multiple scaled versions of the source.
+ * This approximates a Gaussian blur by averaging the image at different scales,
+ * creating a soft, smooth blurring effect.
+ *
+ * The blur works by creating multiple copies of the source at incrementally smaller
+ * scales (from maxScale down to 1.0) and blending them together. More steps create
+ * a smoother, higher-quality blur but at the cost of performance.
+ *
+ * @param {number} amount - Blur intensity/radius (default: 0.3, range: 0-1+)
+ *                          Higher values create stronger blur by increasing the scale range
+ * @param {number} blendFactor - Opacity of each blend layer (default: 0.2, range: 0-1)
+ *                               Lower values create subtler blending between layers
+ * @param {number} steps - Number of blend layers to use (default: 12)
+ *                         More steps = smoother blur but lower performance
+ * @returns {GlslSource} The blurred source
+ */
+GlslSourcePrototype.blur = function (amount = 0.3, blendFactor = 0.2, steps = 12) {
+    const maxScale = 1 + amount;
+    const scaleStep = amount / steps;
+
+    let result = cloneSource(this).scale(maxScale);
+
+    for (let i = 1; i <= steps; i++) {
+        const scale = maxScale - (scaleStep * i);
+        result = result.blend(cloneSource(this).scale(scale), blendFactor);
+    }
+
+    return result;
+};
+
 module.exports = {
     reshapeColorArrays,
     betterGradient,
